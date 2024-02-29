@@ -1,5 +1,7 @@
 package com.devsuperior.dscommerce.controllers;
 
+
+import com.devsuperior.dscommerce.tests.TokenUtil;
 import io.restassured.http.ContentType;
 import org.json.simple.JSONObject;
 import org.junit.jupiter.api.BeforeEach;
@@ -16,6 +18,8 @@ import static org.hamcrest.Matchers.*;
 
 public class ProductControllerRA {
 
+    private String clientUsername, clientPassword, adminUsername, adminPassword;
+    private String clientToken, adminToken, invalidToken;
     private Long existingProductId, nonExistingProductId;
     private String productName;
     private Map<String, Object> postProductInstance;
@@ -23,6 +27,15 @@ public class ProductControllerRA {
     @BeforeEach
     public void setUp() {
         baseURI = "http://localhost:8080";
+
+        clientUsername = "maria@gmail.com";
+        clientPassword = "123456";
+        adminUsername = "alex@gmail.com";
+        adminPassword = "123456";
+
+        clientToken = TokenUtil.obtainAccessToken(clientUsername, clientPassword);
+        adminToken = TokenUtil.obtainAccessToken(adminUsername, adminPassword);
+        invalidToken = adminToken + "xpto";
 
         productName = "Macbook";
         postProductInstance = new HashMap<>();
@@ -94,7 +107,6 @@ public class ProductControllerRA {
     @Test
     public void insertShouldReturnProductCreateWhenAdminLogged() {
         JSONObject newProduct = new JSONObject(postProductInstance);
-        String adminToken = "";
 
         given()
                 .header("Content-type", "application/json")
@@ -109,6 +121,6 @@ public class ProductControllerRA {
                 .body("name", equalTo("Meu produto"))
                 .body("price", is(50.0F))
                 .body("imgUrl", equalTo("https://raw.githubusercontent.com/devsuperior/dscatalog-resources/master/backend/img/1-big.jpg"))
-                .body("categories", hasItems(2, 3));
+                .body("categories.id", hasItems(2, 3));
     }
 }
